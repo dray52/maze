@@ -11,6 +11,7 @@ use crate::modules::collision::check_collision;
 use crate::modules::preload_image::LoadingScreenOptions;
 use crate::modules::still_image::StillImage;
 use macroquad::prelude::*;
+use modules::collision;
 /// Set up window settings before the app runs
 fn window_conf() -> Conf {
     Conf {
@@ -46,25 +47,41 @@ let all_assets = ["assets/maze.png", "assets/amongus.png"];
 
 
     loop {
-         let old_spot=character.pos();
-        clear_background(GREEN);
+    
+         let old_spotx=character.pos().x;
+         let old_spoty=character.pos().y;
+         
+        clear_background(BLACK);
         if is_key_down(KeyCode::Right) {
             character.set_position(vec2(character.pos().x + speed*get_frame_time(), character.pos().y));
+            if check_collision(&character, &maze, 1) {
+                character.set_position(vec2(old_spotx, character.pos().y));
+            }
         }
          if is_key_down(KeyCode::Left) {
             character.set_position(vec2(character.pos().x - speed*get_frame_time(), character.pos().y));
+            if check_collision(&character, &maze, 1) {
+                character.set_position(vec2(old_spotx, character.pos().y));
+            }
         }
          if is_key_down(KeyCode::Down) {
             character.set_position(vec2(character.pos().x, character.pos().y+speed*get_frame_time()));
+            if check_collision(&character, &maze, 1) {
+                character.set_position(vec2(character.pos().x, old_spoty));
+            }
         }
          if is_key_down(KeyCode::Up) {
             character.set_position(vec2(character.pos().x, character.pos().y-speed*get_frame_time()));
-        }let collision = check_collision(&character, &maze, 1);
-
-        if collision {
-            character.set_position(old_spot);
+            if check_collision(&character, &maze, 1) {
+                character.set_position(vec2(character.pos().x, old_spoty));
+            }
         }
-        character.draw();
+
+       
+        
+
+draw_circle(character.pos().x+11.0, character.pos().y+15.0,  60.0, WHITE);
+character.draw();        
 maze.draw();
         next_frame().await;
     }
